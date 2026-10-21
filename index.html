@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Для Катюши 💌</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  
+  body {
+    font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+    background: linear-gradient(160deg, #1a0a1f 0%, #2d0f36 50%, #4a1245 100%);
+    min-height: 100vh;
+    overflow: hidden;
+    color: #fff;
+    position: relative;
+  }
+  
+  /* Звёзды на фоне */
+  .stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+  .star {
+    position: absolute;
+    width: 2px; height: 2px;
+    background: #fff;
+    border-radius: 50%;
+    animation: twinkle 3s infinite ease-in-out;
+    opacity: 0.5;
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.2; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1.3); }
+  }
+  
+  /* Плавающие сердечки */
+  .hearts-bg { position: fixed; inset: 0; pointer-events: none; z-index: 1; }
+  .float-heart {
+    position: absolute;
+    font-size: 20px;
+    animation: floatUp linear infinite;
+    opacity: 0.6;
+  }
+  @keyframes floatUp {
+    0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+    10% { opacity: 0.7; }
+    90% { opacity: 0.7; }
+    100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+  }
+  
+  /* Сцены */
+  .scene {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    z-index: 2;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.8s ease, transform 0.8s ease;
+    transform: scale(0.95);
+  }
+  .scene.active {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
+  }
+  
+  /* Конверт */
+  .envelope {
+    width: 180px;
+    height: 120px;
+    background: linear-gradient(145deg, #ff5f8f, #d63384);
+    border-radius: 12px;
+    position: relative;
+    cursor: pointer;
+    box-shadow: 0 20px 60px rgba(255, 95, 143, 0.5), 0 0 100px rgba(255, 95, 143, 0.3);
+    animation: pulse 2s infinite ease-in-out;
+    transition: transform 0.3s;
+  }
+  .envelope:active { transform: scale(0.95); }
+  .envelope::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 0; height: 0;
+    border-left: 90px solid transparent;
+    border-right: 90px solid transparent;
+    border-top: 60px solid #ff85a8;
+    border-radius: 12px 12px 0 0;
+    z-index: 2;
+  }
+  .envelope::after {
+    content: '💌';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -40%);
+    font-size: 40px;
+    z-index: 3;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 20px 60px rgba(255, 95, 143, 0.5), 0 0 100px rgba(255, 95, 143, 0.3); }
+    50% { transform: scale(1.05); box-shadow: 0 25px 70px rgba(255, 95, 143, 0.7), 0 0 130px rgba(255, 95, 143, 0.5); }
+  }
+  .tap-hint {
+    margin-top: 40px;
+    font-size: 15px;
+    color: rgba(255,255,255,0.7);
+    letter-spacing: 1px;
+    animation: blink 1.5s infinite;
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+  
+  /* Карточки с извинениями */
+  .card {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 24px;
+    padding: 32px 24px;
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+  .card h2 {
+    font-size: 22px;
+    margin-bottom: 16px;
+    color: #ffb3d1;
+    font-weight: 600;
+  }
+  .card p {
+    font-size: 17px;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.92);
+  }
+  .card .emoji {
+    font-size: 44px;
+    margin-bottom: 12px;
+    display: block;
+  }
+  .progress {
+    display: flex;
+    gap: 8px;
+    margin-top: 28px;
+    justify-content: center;
+  }
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.25);
+    transition: all 0.3s;
+  }
+  .dot.active {
+    background: #ff5f8f;
+    width: 24px;
+    border-radius: 4px;
+    box-shadow: 0 0 12px #ff5f8f;
+  }
+  
+  /* Кнопки */
+  .btn {
+    margin-top: 28px;
+    padding: 16px 36px;
+    border: none;
+    border-radius: 50px;
+    background: linear-gradient(135deg, #ff5f8f, #d63384);
+    color: #fff;
+    font-size: 17px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(255, 95, 143, 0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
+    letter-spacing: 0.3px;
+  }
+  .btn:active {
+    transform: scale(0.96);
+    box-shadow: 0 4px 12px rgba(255, 95, 143, 0.6);
+  }
+  
+  /* Финальная сцена */
+  .final-scene { padding: 24px; text-align: center; }
+  .final-title {
+    font-size: 26px;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, #ffb3d1, #ff5f8f);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+  }
+  .final-text {
+    font-size: 17px;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.9);
+    margin-bottom: 8px;
+  }
+  .signature {
+    margin-top: 24px;
+    font-style: italic;
+    color: #ffb3d1;
+    font-size: 16px;
+  }
+  
+  .btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 32px;
+    align-items: center;
+    width: 100%;
+    max-width: 300px;
+  }
+  .btn-yes {
+    width: 100%;
+    padding: 18px;
+    font-size: 18px;
+    background: linear-gradient(135deg, #ff5f8f, #d63384);
+    border: none;
+    border-radius: 50px;
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 10px 30px rgba(255, 95, 143, 0.5);
+    animation: heartbeat 1.5s infinite;
+    position: relative;
+  }
+  @keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    15% { transform: scale(1.06); }
+    30% { transform: scale(1); }
+    45% { transform: scale(1.06); }
+  }
+  .btn-no {
+    width: 100%;
+    padding: 14px;
+    font-size: 15px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 50px;
+    color: rgba(255,255,255,0.7);
+    cursor: pointer;
+    transition: all 0.3s;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  
+  /* Экран благодарности */
+  .thanks-scene { text-align: center; padding: 24px; }
+  .big-heart {
+    font-size: 100px;
+    animation: heartbeat 1s infinite;
+    margin-bottom: 20px;
+    display: block;
+  }
+  .thanks-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #ffb3d1;
+    margin-bottom: 16px;
+  }
+  .thanks-text {
+    font-size: 16px;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.9);
+  }
+  
+  /* Конфетти */
+  .confetti {
+    position: fixed;
+    z-index: 999;
+    pointer-events: none;
+    font-size: 20px;
+    animation: fall linear forwards;
+  }
+  @keyframes fall {
+    0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+  
+  /* Плавное появление текста */
+  .fade-in > * {
+    opacity: 0;
+    animation: fadeUp 0.8s forwards;
+  }
+  .fade-in > *:nth-child(1) { animation-delay: 0.1s; }
+  .fade-in > *:nth-child(2) { animation-delay: 0.3s; }
+  .fade-in > *:nth-child(3) { animation-delay: 0.5s; }
+  .fade-in > *:nth-child(4) { animation-delay: 0.7s; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+<div class="hearts-bg" id="heartsBg"></div>
+
+<!-- Сцена 1: Конверт -->
+<div class="scene active" id="scene1">
+  <div class="envelope" onclick="nextScene(2)"></div>
+  <div class="tap-hint">Нажми, чтобы открыть 💫</div>
+</div>
+
+<!-- Сцена 2: Первое сообщение -->
+<div class="scene" id="scene2">
+  <div class="card fade-in">
+    <span class="emoji">🌙</span>
+    <h2>Катюша...</h2>
+    <p>Прежде чем ты закроешь это, я очень прошу тебя дочитать до конца. Мне нужно сказать тебе кое-что важное.</p>
+    <div class="progress">
+      <div class="dot active"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+    <button class="btn" onclick="nextScene(3)">Дальше →</button>
+  </div>
+</div>
+
+<!-- Сцена 3 -->
+<div class="scene" id="scene3">
+  <div class="card fade-in">
+    <span class="emoji">💔</span>
+    <h2>Я был неправ</h2>
+    <p>Я провинился перед тобой. Не буду искать оправданий — их нет. Я поступил неправильно, и мне искренне жаль.</p>
+    <div class="progress">
+      <div class="dot"></div>
+      <div class="dot active"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+    <button class="btn" onclick="nextScene(4)">Дальше →</button>
+  </div>
+</div>
+
+<!-- Сцена 4 -->
+<div class="scene" id="scene4">
+  <div class="card fade-in">
+    <span class="emoji">🤍</span>
+    <h2>Твоя боль — это важно</h2>
+    <p>Я понимаю, что причинил тебе боль. И я не хочу её обесценивать. Твои чувства и твои трудности — настоящие, и я буду к ним бережным.</p>
+    <div class="progress">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot active"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+    <button class="btn" onclick="nextScene(5)">Дальше →</button>
+  </div>
+</div>
+
+<!-- Сцена 5 -->
+<div class="scene" id="scene5">
+  <div class="card fade-in">
+    <span class="emoji">🌱</span>
+    <h2>Обещаю</h2>
+    <p>Больше так не будет. Я буду переживать за тебя, заботиться о тебе. Каждый день. Не словами — делами. И это не обещание на минуту, а моё намерение по-настоящему.</p>
+    <div class="progress">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot active"></div>
+      <div class="dot"></div>
+    </div>
+    <button class="btn" onclick="nextScene(6)">Дальше →</button>
+  </div>
+</div>
+
+<!-- Финальная сцена -->
+<div class="scene" id="scene6">
+  <div class="final-scene fade-in">
+    <div class="final-title">Катюша, прости меня 🤍</div>
+    <p class="final-text">Ты для меня очень важна.</p>
+    <p class="final-text">Я хочу быть рядом, заботиться и не повторять своих ошибок.</p>
+    <p class="signature">— Никита</p>
+    
+    <div class="btn-group" style="position: relative; margin-top: 36px; min-height: 140px;">
+      <button class="btn-yes" onclick="showThanks()">Прощаю 💗</button>
+      <button class="btn-no" id="noBtn" onclick="runAway()" style="bottom: -60px;">Не сейчас</button>
+    </div>
+  </div>
+</div>
+
+<!-- Экран благодарности -->
+<div class="scene" id="thanksScene">
+  <div class="thanks-scene fade-in">
+    <span class="big-heart">💖</span>
+    <div class="thanks-title">Спасибо, Катюша</div>
+    <p class="thanks-text">Я не подведу. Буду рядом, буду заботиться, буду ценить тебя и твои чувства. Я люблю тебя. 🤍</p>
+    <p class="signature" style="margin-top: 30px;">Твой Никита</p>
+  </div>
+</div>
+
+<script>
+  // Звёзды
+  const starsEl = document.getElementById('stars');
+  for (let i = 0; i < 60; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    s.style.left = Math.random() * 100 + '%';
+    s.style.top = Math.random() * 100 + '%';
+    s.style.animationDelay = Math.random() * 3 + 's';
+    s.style.width = s.style.height = (Math.random() * 2 + 1) + 'px';
+    starsEl.appendChild(s);
+  }
+  
+  // Плавающие сердечки на фоне
+  const heartsBg = document.getElementById('heartsBg');
+  const heartEmojis = ['💗', '🤍', '💕', '✨', '💖'];
+  function spawnHeart() {
+    const h = document.createElement('div');
+    h.className = 'float-heart';
+    h.textContent = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
+    h.style.left = Math.random() * 100 + '%';
+    h.style.fontSize = (12 + Math.random() * 16) + 'px';
+    h.style.animationDuration = (8 + Math.random() * 8) + 's';
+    heartsBg.appendChild(h);
+    setTimeout(() => h.remove(), 16000);
+  }
+  setInterval(spawnHeart, 700);
+  for (let i = 0; i < 8; i++) setTimeout(spawnHeart, i * 200);
+  
+  // Навигация по сценам
+  let currentScene = 1;
+  function nextScene(n) {
+    const cur = document.getElementById('scene' + currentScene);
+    const nxt = document.getElementById('scene' + n);
+    cur.classList.remove('active');
+    setTimeout(() => {
+      nxt.classList.add('active');
+      currentScene = n;
+    }, 400);
+  }
+  
+  // Убегающая кнопка "Не сейчас"
+  let noButtonMoveCount = 0;
+  function runAway() {
+    const btn = document.getElementById('noBtn');
+    noButtonMoveCount++;
+    const messages = [
+      'Ты уверена? 🥺',
+      'Подумай ещё раз...',
+      'Ну Катюша...',
+      'Я исправлюсь!',
+      'Пожалуйста 🤍',
+      'Не уходи 🥺'
+    ];
+    btn.textContent = messages[Math.min(noButtonMoveCount - 1, messages.length - 1)];
+    
+    // Двигаем в случайное место
+    const maxX = Math.min(window.innerWidth - 200, 150);
+    const maxY = 200;
+    const x = (Math.random() - 0.5) * 2 * maxX;
+    const y = (Math.random() - 0.5) * 2 * maxY;
+    btn.style.transform = `translateX(calc(-50% + ${x}px)) translateY(${y}px)`;
+    btn.style.fontSize = Math.max(10, 15 - noButtonMoveCount) + 'px';
+    
+    if (noButtonMoveCount >= 6) {
+      btn.style.opacity = '0.3';
+      btn.style.pointerEvents = 'none';
+    }
+  }
+  
+  // Благодарность + конфетти
+  function showThanks() {
+    document.getElementById('scene6').classList.remove('active');
+    setTimeout(() => {
+      document.getElementById('thanksScene').classList.add('active');
+      launchConfetti();
+    }, 400);
+  }
+  
+  function launchConfetti() {
+    const emojis = ['💖', '💗', '🤍', '✨', '💕', '🌸', '💝'];
+    for (let i = 0; i < 60; i++) {
+      setTimeout(() => {
+        const c = document.createElement('div');
+        c.className = 'confetti';
+        c.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        c.style.left = Math.random() * 100 + '%';
+        c.style.top = '-50px';
+        c.style.fontSize = (16 + Math.random() * 20) + 'px';
+        c.style.animationDuration = (2.5 + Math.random() * 2.5) + 's';
+        c.style.animationDelay = Math.random() * 0.5 + 's';
+        document.body.appendChild(c);
+        setTimeout(() => c.remove(), 5500);
+      }, i * 50);
+    }
+  }
+  
+  // Запрет скролла / pinch-zoom
+  document.addEventListener('gesturestart', e => e.preventDefault());
+</script>
+</body>
+</html>
